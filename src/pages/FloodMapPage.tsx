@@ -1,69 +1,214 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { FloodMap } from "@/components/FloodMap";
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { 
-  ArrowLeft, 
-  MapPin, 
-  Home, 
-  Shield, 
+import {
+  ArrowLeft,
+  MapPin,
+  Home,
+  Shield,
   Navigation,
   Layers,
-  Satellite
-} from 'lucide-react';
+  Satellite,
+} from "lucide-react";
+
+import { Feature, Polygon } from "geojson";
+
+interface FloodProperties {
+  issued_on: string;
+  peak_step: number;
+  peak_day: string;
+  peak_timing: string;
+  max_median_dis: number;
+  min_median_dis: number;
+  control_dis: number;
+  max_max_dis: number;
+  min_min_dis: number;
+  tendency: string;
+  max_p_above_20y: number;
+  max_p_above_5y: number;
+  max_p_above_2y: number;
+  intensity: string;
+}
+
+type FloodFeature = Feature<Polygon, FloodProperties>;
 
 const FloodMapPage = () => {
   const navigate = useNavigate();
   const [isSatelliteView, setIsSatelliteView] = useState(false);
+  const [floodZones, setFloodZones] = useState<FloodFeature[]>([]);
+  const [debugMode, setDebugMode] = useState(false);
 
-  // Mock data for flood zones and shelters
-  const floodZones = [
-    { id: 1, severity: 'high', area: 'Downtown Area', affected: '2,500 people' },
-    { id: 2, severity: 'moderate', area: 'Riverside District', affected: '1,200 people' },
-    { id: 3, severity: 'low', area: 'Hill Station', affected: '300 people' }
+  const simulatedFloodZones: FloodFeature[] = [
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [8.65, 9.05],
+            [8.65, 9.1],
+            [8.7, 9.1],
+            [8.7, 9.05],
+            [8.65, 9.05],
+          ],
+        ],
+      },
+      properties: {
+        issued_on: "2025-07-15",
+        peak_step: 1,
+        peak_day: "2025-07-18",
+        peak_timing: "AM",
+        max_median_dis: 350,
+        min_median_dis: 200,
+        control_dis: 300,
+        max_max_dis: 420,
+        min_min_dis: 120,
+        tendency: "U",
+        max_p_above_20y: 1,
+        max_p_above_5y: 1,
+        max_p_above_2y: 1,
+        intensity: "H",
+      },
+    },
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [8.72, 9.08],
+            [8.72, 9.13],
+            [8.77, 9.13],
+            [8.77, 9.08],
+            [8.72, 9.08],
+          ],
+        ],
+      },
+      properties: {
+        issued_on: "2025-07-15",
+        peak_step: 2,
+        peak_day: "2025-07-19",
+        peak_timing: "PM",
+        max_median_dis: 260,
+        min_median_dis: 180,
+        control_dis: 240,
+        max_max_dis: 310,
+        min_min_dis: 100,
+        tendency: "S",
+        max_p_above_20y: 0,
+        max_p_above_5y: 1,
+        max_p_above_2y: 1,
+        intensity: "P",
+      },
+    },
   ];
 
   const shelters = [
-    { id: 1, name: 'Community Center', distance: '0.5 km', capacity: '500 people' },
-    { id: 2, name: 'School Building', distance: '1.2 km', capacity: '300 people' },
-    { id: 3, name: 'Hospital', distance: '2.1 km', capacity: '200 people' }
+    {
+      id: 1,
+      name: "Community Center",
+      distance: "0.5 km",
+      capacity: "500 people",
+    },
+    {
+      id: 2,
+      name: "School Building",
+      distance: "1.2 km",
+      capacity: "300 people",
+    },
+    { id: 3, name: "Hospital", distance: "2.1 km", capacity: "200 people" },
   ];
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'high': return 'bg-red-500';
-      case 'moderate': return 'bg-amber-500';
-      case 'low': return 'bg-green-500';
-      default: return 'bg-gray-500';
+      case "high":
+        return "bg-red-500";
+      case "moderate":
+        return "bg-amber-500";
+      case "low":
+        return "bg-green-500";
+      default:
+        return "bg-gray-500";
     }
   };
+
+  const fetchFloodZones = async () => {
+    if (debugMode) return;
+    try {
+      const response = await axios.get("https://api.openepi.io/flood/summary", {
+        params: {
+          min_lon: 33.5,
+          max_lon: 34.55,
+          min_lat: -1.4,
+          max_lat: -1.3,
+
+          /* min_lon: 2.683588,
+          max_lon: 14.677982,
+          min_lat: 4.272259,
+          max_lat: 13.892006, */
+        },
+      });
+      const features = response.data?.queried_location?.features || [];
+      setFloodZones(features);
+    } catch (err) {
+      console.error("Failed to fetch flood zones:", err);
+      setFloodZones([]);
+    }
+  };
+
+
+  console.log("Flood Zones:", floodZones);
+
+
+  useEffect(() => {
+    if (debugMode) {
+      setFloodZones(simulatedFloodZones);
+    } else {
+      fetchFloodZones();
+    }
+  }, [debugMode]);
 
   return (
     <div className="min-h-screen p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate('/')}>
-          <ArrowLeft className="h-6 w-6 mr-2" />
-          Back
+        <Button variant="ghost" onClick={() => navigate("/")}>
+          {" "}
+          <ArrowLeft className="h-6 w-6 mr-2" /> Back{" "}
         </Button>
         <h1 className="text-2xl font-bold">Live Flood Map</h1>
         <div className="w-20" />
       </div>
+
+      {/* Toggle Debug Mode */}
+      <Card className="mb-4">
+        <CardContent className="p-4 flex items-center justify-between">
+          <span className="font-medium">Simulate Flood Zones (Debug)</span>
+          <Switch
+            checked={debugMode}
+            onCheckedChange={(checked) => setDebugMode(checked)}
+          />
+        </CardContent>
+      </Card>
 
       {/* Map View Toggle */}
       <Card className="mb-4">
         <CardContent className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Layers className="h-5 w-5 mr-2" />
-              <span className="font-medium">Map View</span>
+              {" "}
+              <Layers className="h-5 w-5 mr-2" />{" "}
+              <span className="font-medium">Map View</span>{" "}
             </div>
             <div className="flex items-center space-x-2">
               <span className="text-sm">Regular</span>
-              <Switch 
-                checked={isSatelliteView} 
+              <Switch
+                checked={isSatelliteView}
                 onCheckedChange={setIsSatelliteView}
               />
               <span className="text-sm">Satellite</span>
@@ -73,20 +218,10 @@ const FloodMapPage = () => {
         </CardContent>
       </Card>
 
-      {/* Map Container */}
-      <Card className="mb-6 h-80">
-        <CardContent className="p-0 h-full">
-          <div className={`h-full rounded-lg flex items-center justify-center text-white font-bold text-xl ${
-            isSatelliteView ? 'bg-gradient-to-br from-green-800 to-blue-900' : 'bg-gradient-to-br from-blue-400 to-blue-600'
-          }`}>
-            <div className="text-center">
-              <MapPin className="h-16 w-16 mx-auto mb-4 animate-bounce" />
-              <p>Interactive Map</p>
-              <p className="text-sm font-normal mt-2">
-                {isSatelliteView ? 'Satellite View' : 'Regular View'}
-              </p>
-            </div>
-          </div>
+      {/* Map */}
+      <Card className="mb-6 h-96">
+        <CardContent className="p-0 h-full overflow-hidden">
+          <FloodMap isSatellite={isSatelliteView} floodZones={floodZones} />
         </CardContent>
       </Card>
 
@@ -99,7 +234,9 @@ const FloodMapPage = () => {
             </div>
             <div>
               <p className="font-semibold">Your Location</p>
-              <p className="text-sm text-muted-foreground">Downtown District, Safe Zone</p>
+              <p className="text-sm text-muted-foreground">
+                Nigeria, Safe Zone
+              </p>
             </div>
           </div>
         </CardContent>
@@ -108,36 +245,56 @@ const FloodMapPage = () => {
       {/* Flood Zones */}
       <div className="mb-6">
         <h2 className="text-xl font-semibold mb-4 flex items-center">
-          <Shield className="h-6 w-6 mr-2 text-red-500" />
-          Flood Affected Areas
+          <Shield className="h-6 w-6 mr-2 text-red-500" /> Flood Affected Areas
         </h2>
         <div className="space-y-3">
-          {floodZones.map((zone) => (
-            <Card key={zone.id}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className={`w-4 h-4 rounded-full ${getSeverityColor(zone.severity)} mr-3`} />
-                    <div>
-                      <p className="font-semibold">{zone.area}</p>
-                      <p className="text-sm text-muted-foreground">{zone.affected}</p>
+          {floodZones.length === 0 ? (
+            <div className="text-center text-muted-foreground text-sm italic">
+              No flood zones currently forecasted in Nigeria.
+            </div>
+          ) : (
+            floodZones.map((zone, idx) => {
+              const severityCode = zone.properties.intensity;
+              const severity =
+                severityCode === "H"
+                  ? "high"
+                  : severityCode === "P"
+                  ? "moderate"
+                  : "low";
+
+              return (
+                <Card key={idx}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <div
+                          className={`w-4 h-4 rounded-full ${getSeverityColor(
+                            severity
+                          )} mr-3`}
+                        />
+                        <div>
+                          <p className="font-semibold">Zone {idx + 1}</p>
+                          <p className="text-sm text-muted-foreground">
+                            Peak Day: {zone.properties.peak_day}
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-xs px-2 py-1 bg-muted rounded capitalize">
+                        {severity} Risk
+                      </span>
                     </div>
-                  </div>
-                  <span className="text-xs px-2 py-1 bg-muted rounded capitalize">
-                    {zone.severity} Risk
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
         </div>
       </div>
 
       {/* Nearby Shelters */}
       <div className="mb-20">
         <h2 className="text-xl font-semibold mb-4 flex items-center">
-          <Home className="h-6 w-6 mr-2 text-green-500" />
-          Nearby Shelters
+          <Home className="h-6 w-6 mr-2 text-green-500" /> Nearby Shelters
         </h2>
         <div className="space-y-3">
           {shelters.map((shelter) => (
@@ -150,7 +307,7 @@ const FloodMapPage = () => {
                       {shelter.distance} • {shelter.capacity}
                     </p>
                   </div>
-                  <Button size="sm" onClick={() => navigate('/safe-route')}>
+                  <Button size="sm" onClick={() => navigate("/safe-route")}>
                     Get Directions
                   </Button>
                 </div>
