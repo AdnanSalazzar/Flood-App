@@ -8,7 +8,7 @@ Follow these steps:
 git clone https://github.com/AdnanSalazzar/Flood-App.git
 
 # Step 2: Navigate to the project directory.
-cd flood-watch-buddy-app
+cd Flood-App
 
 # Step 3: Install the necessary dependencies.
 npm i

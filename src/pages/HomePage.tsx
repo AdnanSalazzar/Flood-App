@@ -1,82 +1,94 @@
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { FloodStatusCard } from "@/components/FloodStatusCard";
 
-import React , { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { FloodStatusCard } from '@/components/FloodStatusCard';
-
-import { 
-  MapPin, 
-  LifeBuoy, 
-  Navigation, 
-  BookOpen, 
+import {
+  MapPin,
+  LifeBuoy,
+  Navigation,
+  BookOpen,
   Phone,
   AlertTriangle,
   Settings,
   MessageCircle,
-  Camera
-} from 'lucide-react';
+  Camera,
+} from "lucide-react";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  const floodRiskLevel = 'moderate'; // This would come from API in real app
+  const floodRiskLevel = "moderate"; // This would come from API in real app
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'low': return 'flood-low';
-      case 'moderate': return 'flood-moderate';
-      case 'high': return 'flood-high';
-      default: return 'flood-low';
+      case "low":
+        return "flood-low";
+      case "moderate":
+        return "flood-moderate";
+      case "high":
+        return "flood-high";
+      default:
+        return "flood-low";
     }
   };
 
   const getRiskText = (level: string) => {
     switch (level) {
-      case 'low': return 'Low Risk';
-      case 'moderate': return 'Moderate Risk';
-      case 'high': return 'High Risk';
-      default: return 'Unknown';
+      case "low":
+        return "Low Risk";
+      case "moderate":
+        return "Moderate Risk";
+      case "high":
+        return "High Risk";
+      default:
+        return "Unknown";
     }
   };
 
   const mainActions = [
     {
-      title: 'Live Map',
+      title: "Live Map",
       icon: MapPin,
-      path: '/map',
-      gradient: 'gradient-water'
+      path: "/map",
+      gradient: "gradient-water",
     },
     {
-      title: 'Get Help',
+      title: "Get Help",
       icon: LifeBuoy,
-      path: '/chat',
-      gradient: 'gradient-safe'
+      path: "/chat",
+      gradient: "gradient-safe",
     },
     {
-      title: 'Safe Routes',
+      title: "Safe Routes",
       icon: Navigation,
-      path: '/safe-route',
-      gradient: 'gradient-water'
+      path: "/safe-route",
+      gradient: "gradient-water",
     },
     {
-      title: 'Flood Guide',
+      title: "Flood Guide",
       icon: BookOpen,
-      path: '/guide',
-      gradient: 'gradient-safe'
-    }
+      path: "/guide",
+      gradient: "gradient-safe",
+    },
   ];
 
   const quickActions = [
     {
-      title: 'Report Flood',
+      title: "Report Flood",
       icon: Camera,
-      path: '/report'
+      path: "/report",
     },
     {
-      title: 'Settings',
+      title: "Settings",
       icon: Settings,
-      path: '/settings'
-    }
+      path: "/settings",
+    },
+    {
+      title: "Add Safe Route",
+      icon: Navigation,
+      path: "/add-shelter",
+    },
   ];
 
   return (
@@ -97,15 +109,19 @@ const HomePage = () => {
       {/* Main Action Buttons */}
       <div className="grid grid-cols-2 gap-4 mb-8">
         {mainActions.map((action, index) => (
-          <Card 
+          <Card
             key={action.title}
             className="cursor-pointer transform transition-all duration-200 hover:scale-105 active:scale-95"
             onClick={() => navigate(action.path)}
             style={{ animationDelay: `${index * 100}ms` }}
           >
-            <CardContent className={`p-6 ${action.gradient} text-white rounded-lg h-32 flex flex-col items-center justify-center`}>
+            <CardContent
+              className={`p-6 ${action.gradient} text-white rounded-lg h-32 flex flex-col items-center justify-center`}
+            >
               <action.icon className="h-10 w-10 mb-2" />
-              <span className="text-lg font-semibold text-center">{action.title}</span>
+              <span className="text-lg font-semibold text-center">
+                {action.title}
+              </span>
             </CardContent>
           </Card>
         ))}
@@ -132,10 +148,7 @@ const HomePage = () => {
         <Button
           size="lg"
           className="bg-red-500 hover:bg-red-600 text-white rounded-full px-8 py-4 text-xl font-bold shadow-2xl animate-pulse-slow"
-          onClick={() => {
-            // In real app, this would trigger emergency services
-            alert('Emergency services contacted!');
-          }}
+          onClick={() => navigate("/emergency-sos")}
         >
           <Phone className="h-8 w-8 mr-2" />
           EMERGENCY SOS

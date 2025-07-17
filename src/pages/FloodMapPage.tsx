@@ -35,6 +35,13 @@ interface FloodProperties {
   intensity: string;
 }
 
+interface UserShelter {
+  name: string;
+  latitude: string;
+  longitude: string;
+  capacity: string;
+}
+
 type FloodFeature = Feature<Polygon, FloodProperties>;
 
 const FloodMapPage = () => {
@@ -107,7 +114,9 @@ const FloodMapPage = () => {
       },
     },
   ];
-
+  const storedShelters = JSON.parse(
+    localStorage.getItem("userShelters") || "[]"
+  );
   const shelters = [
     {
       id: 1,
@@ -122,6 +131,13 @@ const FloodMapPage = () => {
       capacity: "300 people",
     },
     { id: 3, name: "Hospital", distance: "2.1 km", capacity: "200 people" },
+
+    ...storedShelters.map((shelter: UserShelter, idx: number) => ({
+      id: 100 + idx,
+      name: shelter.name,
+      distance: `${Math.random().toFixed(2)} km`, // You can calculate using coordinates later
+      capacity: `${shelter.capacity} people`,
+    })),
   ];
 
   const getSeverityColor = (severity: string) => {
@@ -151,6 +167,11 @@ const FloodMapPage = () => {
           max_lon: 14.677982,
           min_lat: 4.272259,
           max_lat: 13.892006, */
+
+          /* min_lon: 11.0,
+          max_lon: 30.0,
+          min_lat: -7.0,
+          max_lat: 5.0, */
         },
       });
       const features = response.data?.queried_location?.features || [];
@@ -161,9 +182,7 @@ const FloodMapPage = () => {
     }
   };
 
-
   console.log("Flood Zones:", floodZones);
-
 
   useEffect(() => {
     if (debugMode) {
@@ -247,7 +266,7 @@ const FloodMapPage = () => {
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <Shield className="h-6 w-6 mr-2 text-red-500" /> Flood Affected Areas
         </h2>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
           {floodZones.length === 0 ? (
             <div className="text-center text-muted-foreground text-sm italic">
               No flood zones currently forecasted in Nigeria.
@@ -296,7 +315,7 @@ const FloodMapPage = () => {
         <h2 className="text-xl font-semibold mb-4 flex items-center">
           <Home className="h-6 w-6 mr-2 text-green-500" /> Nearby Shelters
         </h2>
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
           {shelters.map((shelter) => (
             <Card key={shelter.id}>
               <CardContent className="p-4">
