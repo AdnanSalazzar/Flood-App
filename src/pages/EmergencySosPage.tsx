@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { HelpingHand, BriefcaseMedical } from "lucide-react";
+
 import {
   Phone,
   MapPin,
@@ -11,21 +13,30 @@ import {
   Building,
   Users,
   CheckCircle,
-  XCircle
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useToast } from '@/hooks/use-toast';
+  XCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+interface EmergencyContact {
+  name: string;
+  phone: string;
+}
+
 const EmergencySosPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [gpsStatus, setGpsStatus] = useState<'acquiring' | 'acquired' | 'unavailable'>('acquiring');
-  const [bluetoothStatus, setBluetoothStatus] = useState<'connected' | 'disconnected'>('disconnected');
+  const [gpsStatus, setGpsStatus] = useState<
+    "acquiring" | "acquired" | "unavailable"
+  >("acquiring");
+  const [bluetoothStatus, setBluetoothStatus] = useState<
+    "connected" | "disconnected"
+  >("disconnected");
   // Mock GPS and Bluetooth status
   useEffect(() => {
     const timer = setTimeout(() => {
-      setGpsStatus('acquired');
-      setBluetoothStatus('connected');
+      setGpsStatus("acquired");
+      setBluetoothStatus("connected");
     }, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -37,10 +48,10 @@ const EmergencySosPage = () => {
     });
   };
   const handleEmergencyService = () => {
-    window.location.href = 'tel:999';
+    window.location.href = "tel:999";
   };
   const handleDisasterOffice = () => {
-    window.location.href = 'tel:112';
+    window.location.href = "tel:112";
   };
   const handleBluetoothSOS = () => {
     toast({
@@ -51,9 +62,9 @@ const EmergencySosPage = () => {
   const handleShareLocation = () => {
     if (navigator.share) {
       navigator.share({
-        title: 'Emergency Location',
-        text: 'I need help! My current location:',
-        url: window.location.href
+        title: "Emergency Location",
+        text: "I need help! My current location:",
+        url: window.location.href,
       });
     } else {
       toast({
@@ -62,20 +73,25 @@ const EmergencySosPage = () => {
       });
     }
   };
-  const emergencyContacts = [
-    { name: "John", phone: "+1234567890", avatar: "J" },
-    { name: "Sarah", phone: "+1234567891", avatar: "S" },
-    { name: "Mom", phone: "+1234567892", avatar: "M" },
-  ];
+  const [emergencyContacts, setEmergencyContacts] = useState<
+    { name: string; phone: string }[]
+  >([]);
+
+  useEffect(() => {
+    const storedContacts = localStorage.getItem("emergencyContacts");
+    if (storedContacts) {
+      const parsed = JSON.parse(storedContacts);
+      setEmergencyContacts(
+        parsed.filter((c: EmergencyContact) => c.name && c.phone).slice(0, 3)
+      );
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/')}
-          className="p-2"
-        >
+        <Button variant="ghost" onClick={() => navigate("/")} className="p-2">
           <ArrowLeft className="h-6 w-6" />
         </Button>
         <h1 className="text-xl font-bold text-foreground">Emergency SOS</h1>
@@ -88,25 +104,29 @@ const EmergencySosPage = () => {
             <MapPin className="h-5 w-5 text-primary" />
             <span className="text-sm font-medium">GPS Status:</span>
             <div className="flex items-center space-x-1">
-              {gpsStatus === 'acquired' ? (
+              {gpsStatus === "acquired" ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
-              ) : gpsStatus === 'unavailable' ? (
+              ) : gpsStatus === "unavailable" ? (
                 <XCircle className="h-4 w-4 text-red-500" />
               ) : (
                 <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
               )}
-              <span className="text-sm capitalize text-muted-foreground">{gpsStatus}</span>
+              <span className="text-sm capitalize text-muted-foreground">
+                {gpsStatus}
+              </span>
             </div>
           </div>
           <div className="flex items-center space-x-2">
             <Bluetooth className="h-5 w-5 text-primary" />
             <div className="flex items-center space-x-1">
-              {bluetoothStatus === 'connected' ? (
+              {bluetoothStatus === "connected" ? (
                 <CheckCircle className="h-4 w-4 text-green-500" />
               ) : (
                 <XCircle className="h-4 w-4 text-red-500" />
               )}
-              <span className="text-sm capitalize text-muted-foreground">{bluetoothStatus}</span>
+              <span className="text-sm capitalize text-muted-foreground">
+                {bluetoothStatus}
+              </span>
             </div>
           </div>
         </div>
@@ -147,7 +167,7 @@ const EmergencySosPage = () => {
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
               <Building className="h-6 w-6 text-blue-600" />
             </div>
-            <span className="font-medium text-sm">Disaster Office</span>
+            <span className="font-medium text-sm">Civil Defence</span>
             <span className="text-xs text-muted-foreground">Call 112</span>
           </div>
         </Card>
@@ -172,10 +192,47 @@ const EmergencySosPage = () => {
               <Share2 className="h-6 w-6 text-green-600" />
             </div>
             <span className="font-medium text-sm">Share Location</span>
-            <span className="text-xs text-muted-foreground">Send to Contacts</span>
+            <span className="text-xs text-muted-foreground">
+              Send to Contacts
+            </span>
+          </div>
+        </Card>
+
+        <Card
+          className="p-4 cursor-pointer hover:shadow-lg transition-all duration-200 active:scale-95 bg-card/50 backdrop-blur-sm"
+          onClick={handleShareLocation}
+        >
+          <div className="flex flex-col items-center space-y-2 text-center">
+            <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+              <BriefcaseMedical className="h-6 w-6 text-green-600" />
+            </div>
+            <span className="font-medium text-sm">
+              NGO and Relief Organization
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Find Help Nearby
+            </span>
+          </div>
+        </Card>
+
+        <Card
+          className="p-4 cursor-pointer hover:shadow-lg transition-all duration-200 active:scale-95 bg-card/50 backdrop-blur-sm"
+          onClick={handleShareLocation}
+        >
+          <div className="flex flex-col items-center space-y-2 text-center">
+            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Users className="h-6 w-6 text-green-600" />
+            </div>
+            <span className="font-medium text-sm">
+              Community Based Volunteer
+            </span>
+            <span className="text-xs text-muted-foreground">
+              Connect with Locals
+            </span>
           </div>
         </Card>
       </div>
+
       {/* Emergency Contacts */}
       <Card className="p-4 bg-card/50 backdrop-blur-sm">
         <div className="flex items-center space-x-2 mb-3">
@@ -188,10 +245,10 @@ const EmergencySosPage = () => {
               key={index}
               variant="outline"
               className="h-16 w-16 rounded-full p-0 flex flex-col items-center justify-center bg-background/50"
-              onClick={() => window.location.href = `tel:${contact.phone}`}
+              onClick={() => (window.location.href = `tel:${contact.phone}`)}
             >
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-bold mb-1">
-                {contact.avatar}
+                {contact.name.charAt(0).toUpperCase()}
               </div>
               <span className="text-xs">{contact.name}</span>
             </Button>
@@ -202,7 +259,3 @@ const EmergencySosPage = () => {
   );
 };
 export default EmergencySosPage;
-
-
-
-

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FloodStatusCard } from "@/components/FloodStatusCard";
+import { Image } from "lucide-react";
 
 import {
   MapPin,
@@ -88,6 +89,11 @@ const HomePage = () => {
       title: "Add Safe Route",
       icon: Navigation,
       path: "/add-shelter",
+    },
+    {
+      title: "Flood Gallery",
+      icon: Image,
+      path: "/gallery",
     },
   ];
 

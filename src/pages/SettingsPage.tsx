@@ -1,13 +1,12 @@
-
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { 
-  ArrowLeft, 
-  Settings, 
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import {
+  ArrowLeft,
+  Settings,
   Globe,
   Wifi,
   MessageSquare,
@@ -15,94 +14,105 @@ import {
   Bell,
   User,
   Shield,
-  Info
-} from 'lucide-react';
+  Info,
+} from "lucide-react";
 
 const SettingsPage = () => {
   const navigate = useNavigate();
-  const [language, setLanguage] = useState('english');
+  const [language, setLanguage] = useState("english");
   const [offlineMode, setOfflineMode] = useState(false);
   const [smsAlerts, setSmsAlerts] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
-  const [emergencyContact, setEmergencyContact] = useState('');
+  const [emergencyContact, setEmergencyContact] = useState("");
+
+  const [emergencyContacts, setEmergencyContacts] = useState([
+    { name: "", phone: "" },
+    { name: "", phone: "" },
+    { name: "", phone: "" },
+  ]);
+
+  const handleContactChange = (
+    index: number,
+    field: "name" | "phone",
+    value: string
+  ) => {
+    const updated = [...emergencyContacts];
+    updated[index][field] = value;
+    setEmergencyContacts(updated);
+  };
 
   const languages = [
-    { id: 'english', label: 'English', flag: '🇺🇸' },
-    { id: 'bangla', label: 'বাংলা (Bangla)', flag: '🇧🇩' }
+    { id: "english", label: "English", flag: "🇺🇸" },
+    { id: "bangla", label: "বাংলা (Bangla)", flag: "🇧🇩" },
   ];
 
   const settingSections = [
     {
-      title: 'Language & Accessibility',
+      title: "Language & Accessibility",
       icon: Globe,
       items: [
         {
-          type: 'select',
-          label: 'App Language',
+          type: "select",
+          label: "App Language",
           value: language,
           onChange: setLanguage,
-          options: languages
-        }
-      ]
+          options: languages,
+        },
+      ],
     },
     {
-      title: 'Connectivity',
+      title: "Connectivity",
       icon: Wifi,
       items: [
         {
-          type: 'toggle',
-          label: 'Offline Mode',
-          description: 'Download maps and data for offline use',
+          type: "toggle",
+          label: "Offline Mode",
+          description: "Download maps and data for offline use",
           value: offlineMode,
-          onChange: setOfflineMode
-        }
-      ]
+          onChange: setOfflineMode,
+        },
+      ],
     },
     {
-      title: 'Notifications',
+      title: "Notifications",
       icon: Bell,
       items: [
         {
-          type: 'toggle',
-          label: 'Push Notifications',
-          description: 'Receive flood alerts and updates',
+          type: "toggle",
+          label: "Push Notifications",
+          description: "Receive flood alerts and updates",
           value: pushNotifications,
-          onChange: setPushNotifications
+          onChange: setPushNotifications,
         },
         {
-          type: 'toggle',
-          label: 'SMS Alerts',
-          description: 'Receive emergency alerts via SMS',
+          type: "toggle",
+          label: "SMS Alerts",
+          description: "Receive emergency alerts via SMS",
           value: smsAlerts,
-          onChange: setSmsAlerts
-        }
-      ]
+          onChange: setSmsAlerts,
+        },
+      ],
     },
     {
-      title: 'Emergency Contact',
+      title: "Emergency Contacts",
       icon: Phone,
-      items: [
-        {
-          type: 'input',
-          label: 'Primary Emergency Contact',
-          placeholder: 'Enter phone number',
-          value: emergencyContact,
-          onChange: setEmergencyContact
-        }
-      ]
-    }
+      items: [],
+    },
   ];
 
   const handleSave = () => {
-    // In a real app, this would save to backend/local storage
-    alert('Settings saved successfully!');
+    localStorage.setItem(
+      "emergencyContacts",
+      JSON.stringify(emergencyContacts)
+    );
+    alert("Settings saved successfully!");
   };
 
   return (
     <div className="min-h-screen p-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <Button variant="ghost" onClick={() => navigate('/')}>
+        <Button variant="ghost" onClick={() => navigate("/")}>
           <ArrowLeft className="h-6 w-6 mr-2" />
           Back
         </Button>
@@ -122,7 +132,9 @@ const SettingsPage = () => {
             </div>
             <div>
               <h3 className="font-semibold text-lg">Anonymous User</h3>
-              <p className="text-sm text-muted-foreground">Location: Downtown District</p>
+              <p className="text-sm text-muted-foreground">
+                Location: Downtown District
+              </p>
             </div>
           </div>
         </CardContent>
@@ -136,16 +148,18 @@ const SettingsPage = () => {
               <section.icon className="h-6 w-6 mr-2 text-primary" />
               {section.title}
             </h3>
-            
+
             <div className="space-y-4">
               {section.items.map((item, itemIndex) => (
                 <div key={itemIndex}>
-                  {item.type === 'toggle' && (
+                  {item.type === "toggle" && (
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">{item.label}</p>
                         {item.description && (
-                          <p className="text-sm text-muted-foreground">{item.description}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {item.description}
+                          </p>
                         )}
                       </div>
                       <Switch
@@ -154,15 +168,17 @@ const SettingsPage = () => {
                       />
                     </div>
                   )}
-                  
-                  {item.type === 'select' && (
+
+                  {item.type === "select" && (
                     <div>
                       <p className="font-medium mb-2">{item.label}</p>
                       <div className="grid grid-cols-1 gap-2">
                         {item.options.map((option) => (
                           <Button
                             key={option.id}
-                            variant={item.value === option.id ? "default" : "outline"}
+                            variant={
+                              item.value === option.id ? "default" : "outline"
+                            }
                             className="justify-start h-12"
                             onClick={() => item.onChange(option.id)}
                           >
@@ -173,8 +189,8 @@ const SettingsPage = () => {
                       </div>
                     </div>
                   )}
-                  
-                  {item.type === 'input' && (
+
+                  {item.type === "input" && (
                     <div>
                       <p className="font-medium mb-2">{item.label}</p>
                       <Input
@@ -187,6 +203,28 @@ const SettingsPage = () => {
                   )}
                 </div>
               ))}
+              {section.title === "Emergency Contacts" && (
+                <div className="space-y-4">
+                  {emergencyContacts.map((contact, index) => (
+                    <div key={index} className="grid grid-cols-2 gap-2">
+                      <Input
+                        placeholder={`Name ${index + 1}`}
+                        value={contact.name}
+                        onChange={(e) =>
+                          handleContactChange(index, "name", e.target.value)
+                        }
+                      />
+                      <Input
+                        placeholder={`Phone ${index + 1}`}
+                        value={contact.phone}
+                        onChange={(e) =>
+                          handleContactChange(index, "phone", e.target.value)
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -199,7 +237,7 @@ const SettingsPage = () => {
             <Info className="h-6 w-6 mr-2 text-primary" />
             App Information
           </h3>
-          
+
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span>App Version</span>
@@ -207,11 +245,15 @@ const SettingsPage = () => {
             </div>
             <div className="flex justify-between">
               <span>Last Updated</span>
-              <span className="text-muted-foreground">{new Date().toLocaleDateString()}</span>
+              <span className="text-muted-foreground">
+                {new Date().toLocaleDateString()}
+              </span>
             </div>
             <div className="flex justify-between">
               <span>Data Source</span>
-              <span className="text-muted-foreground">Local Weather Service</span>
+              <span className="text-muted-foreground">
+                Local Weather Service
+              </span>
             </div>
           </div>
         </CardContent>
@@ -224,7 +266,7 @@ const SettingsPage = () => {
             <Shield className="h-6 w-6 mr-2 text-green-500" />
             Privacy & Safety
           </h3>
-          
+
           <div className="space-y-3">
             <Button variant="outline" className="w-full justify-start">
               Privacy Policy
@@ -241,7 +283,7 @@ const SettingsPage = () => {
 
       {/* Save Button */}
       <div className="mb-20">
-        <Button 
+        <Button
           onClick={handleSave}
           className="w-full h-14 text-lg font-semibold gradient-safe text-white border-0"
         >
@@ -253,8 +295,8 @@ const SettingsPage = () => {
       <Card className="bg-blue-50 border-blue-200 mb-4">
         <CardContent className="p-4">
           <p className="text-blue-800 text-sm text-center">
-            <strong>Note:</strong> These settings help improve your flood safety experience. 
-            Emergency features work even with limited connectivity.
+            <strong>Note:</strong> These settings help improve your flood safety
+            experience. Emergency features work even with limited connectivity.
           </p>
         </CardContent>
       </Card>
