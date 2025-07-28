@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
+import { UserPlus, AlertCircle } from "lucide-react";
+
 import {
   ArrowLeft,
   Settings,
@@ -24,6 +26,9 @@ const SettingsPage = () => {
   const [smsAlerts, setSmsAlerts] = useState(true);
   const [pushNotifications, setPushNotifications] = useState(true);
   const [emergencyContact, setEmergencyContact] = useState("");
+  const [isPregnant, setIsPregnant] = useState(false);
+  const [hasElderly, setHasElderly] = useState(false);
+  const [hasChild, setHasChild] = useState(false);
 
   const [emergencyContacts, setEmergencyContacts] = useState([
     { name: "", phone: "" },
@@ -93,6 +98,36 @@ const SettingsPage = () => {
         },
       ],
     },
+    {
+      title: "Vulnerable Groups",
+      icon: AlertCircle, // you can also use 'UserPlus' or any relevant icon
+      items: [
+        {
+          type: "toggle",
+          label: "Pregnant Woman in Household",
+          description: "Get medical shelter info and maternity support alerts",
+          value: isPregnant,
+          onChange: setIsPregnant,
+        },
+        {
+          type: "toggle",
+          label: "Elderly in Household",
+          description:
+            "Receive evacuation assistance and mobility-safe route alerts",
+          value: hasElderly,
+          onChange: setHasElderly,
+        },
+        {
+          type: "toggle",
+          label: "Child in Household",
+          description:
+            "Get alerts tailored for children's needs and safe zones",
+          value: hasChild,
+          onChange: setHasChild,
+        },
+      ],
+    },
+
     {
       title: "Emergency Contacts",
       icon: Phone,

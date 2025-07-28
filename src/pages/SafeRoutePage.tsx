@@ -31,17 +31,26 @@ type RoadGeoJSON = FeatureCollection<
 >;
 
 // Debugging location for Nigeria
-const DEBUG_LOCATION_NIGERIA: [number, number] = [9.495, 9.057]; // Abuja approx (lon, lat)
+const DEBUG_LOCATION_NIGERIA: [number, number] = [3.3792, 9.5244]; // Lagos, Nigeria // Abuja approx (lon, lat) Poor Quality [9.495, 11.057];
 
 const SafeRoutePage = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState("");
   const [transportMode, setTransportMode] = useState("walking");
   const [geoJsonData, setGeoJsonData] = useState(null);
+  const [roadsData, setRoadsData] = useState<RoadFeature[]>([]);
 
   const [nearestPointCoord, setNearestPointCoord] = useState<
     [number, number] | null
   >(null);
+
+  const [nearestRoadProperties, setNearestRoadProperties] = useState<{
+    ROADNO?: string;
+    LANES?: number;
+    SURFTYPE?: string;
+    PAVETYPE?: string;
+    CONDITION?: string;
+  } | null>(null);
 
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
@@ -53,8 +62,75 @@ const SafeRoutePage = () => {
     null
   );
 
-  const findNearestRoad = () => {
+  const findNextBestRoad = () => {
     if (!userLocation || !geoJsonData) return;
+
+    const userPoint: Feature<Point> = turf.point(userLocation);
+    const sortedRoads = geoJsonData.features
+      .map((road: RoadFeature) => {
+        const snapped = turf.nearestPointOnLine(road, userPoint);
+        const distance = turf.distance(userPoint, snapped);
+        return { road, snapped, distance };
+      })
+      .filter(({ road }) => road.properties.CONDITION !== "Poor")
+      .sort((a, b) => a.distance - b.distance);
+
+    const best = sortedRoads[0];
+    if (!best) return;
+
+    const { snapped, road } = best;
+    setNearestPointCoord(snapped.geometry.coordinates as [number, number]);
+    setNearestRoadProperties({
+      ROADNO: road.properties.ROADNO as string,
+      LANES: road.properties.LANES as number,
+      SURFTYPE: road.properties.SURFTYPE as string,
+      PAVETYPE: road.properties.PAVETYPE as string,
+      CONDITION: road.properties.CONDITION as string,
+    });
+
+    const route = turf.lineString([userLocation, snapped.geometry.coordinates]);
+
+    if (map.current?.getSource("route_to_road")) {
+      (
+        map.current.getSource("route_to_road") as maplibregl.GeoJSONSource
+      ).setData(route);
+    } else {
+      map.current?.addSource("route_to_road", {
+        type: "geojson",
+        data: route,
+      });
+
+      map.current?.addLayer({
+        id: "route_to_road_layer",
+        type: "line",
+        source: "route_to_road",
+        paint: {
+          "line-color": "#ff0000",
+          "line-width": 4,
+          "line-dasharray": [2, 2],
+        },
+      });
+    }
+
+    const popup = new maplibregl.Popup({ closeOnClick: false })
+      .setLngLat(snapped.geometry.coordinates as [number, number])
+      .setHTML(
+        `
+      <div style="font-size:14px; font-weight:bold; line-height:1.4;">
+        🚧 <strong>Alternative Road Info</strong><br/>
+        <span>Road No:</span> ${road.properties.ROADNO || "N/A"}<br/>
+        <span>Lanes:</span> ${road.properties.LANES || "N/A"}<br/>
+        <span>Surface:</span> ${road.properties.SURFTYPE || "N/A"}<br/>
+        <span>Pavement:</span> ${road.properties.PAVETYPE || "N/A"}<br/>
+        <span>Condition:</span> ${road.properties.CONDITION || "N/A"}
+      </div>
+    `
+      )
+      .addTo(map.current!);
+  };
+
+  const findNearestRoad = () => {
+    if (!userLocation || !geoJsonData) return; // Guard statement
 
     const userPoint: Feature<Point> = turf.point(userLocation);
     const roads: RoadFeature[] = geoJsonData.features;
@@ -69,6 +145,15 @@ const SafeRoutePage = () => {
       if (distance < nearestDistance) {
         nearestDistance = distance;
         nearestPoint = snapped;
+
+        // Save the road's properties as well
+        setNearestRoadProperties({
+          ROADNO: road.properties.ROADNO as string,
+          LANES: road.properties.LANES as number,
+          SURFTYPE: road.properties.SURFTYPE as string,
+          PAVETYPE: road.properties.PAVETYPE as string,
+          CONDITION: road.properties.CONDITION as string,
+        });
       }
     });
 
@@ -103,6 +188,24 @@ const SafeRoutePage = () => {
           },
         });
       }
+      // 📍 Show Popup on map
+      if (nearestRoadProperties) {
+        const popup = new maplibregl.Popup({ closeOnClick: false })
+          .setLngLat(nearestPoint.geometry.coordinates as [number, number])
+          .setHTML(
+            `
+        <div style="font-size:14px; font-weight:bold; line-height:1.4;">
+          🚧 <strong>Nearest Road Info</strong><br/>
+          <span>Road No:</span> ${nearestRoadProperties.ROADNO || "N/A"}<br/>
+          <span>Lanes:</span> ${nearestRoadProperties.LANES || "N/A"}<br/>
+          <span>Surface:</span> ${nearestRoadProperties.SURFTYPE || "N/A"}<br/>
+          <span>Pavement:</span> ${nearestRoadProperties.PAVETYPE || "N/A"}<br/>
+          <span>Condition:</span> ${nearestRoadProperties.CONDITION || "N/A"}
+        </div>
+      `
+          )
+          .addTo(map.current);
+      }
     }
   };
 
@@ -110,7 +213,10 @@ const SafeRoutePage = () => {
   useEffect(() => {
     fetch("/data/nigeria_roads.geojson")
       .then((res) => res.json())
-      .then((data) => setGeoJsonData(data))
+      .then((data: RoadGeoJSON) => {
+        setGeoJsonData(data);
+        setRoadsData(data.features);
+      })
       .catch((err) => console.error("Failed to load GeoJSON", err));
   }, []);
 
@@ -245,43 +351,61 @@ const SafeRoutePage = () => {
       {/* Destination Input */}
       <Card className="mb-6">
         <CardContent className="p-4">
-          <div className="space-y-4">
-            <div>
+          <div className="row space-y-4">
+            <div className="col space-y-2">
               <label className="text-sm font-medium mb-2 block">
-                Where do you want to go?
+                Locate your current position
               </label>
-              <div className="flex space-x-2">
-                <Input
-                  placeholder="Enter destination or select shelter..."
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className="flex-1"
-                />
+
+              <div className="col space-x-2 ">
                 <Button variant="outline" onClick={locateUser}>
                   <MapPin className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
 
-            <div className="flex flex-wrap gap-2">
-              {["Community Center", "Hospital", "School", "Police Station"].map(
-                (place) => (
-                  <Button
-                    key={place}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setDestination(place)}
-                  >
-                    {place}
-                  </Button>
-                )
+              {nearestRoadProperties && (
+                <div className="mb-4 p-4 border rounded bg-yellow-100 shadow-md">
+                  <h3 className="font-bold mb-3 text-xl text-gray-800">
+                    🚧 Nearest Road Info
+                  </h3>
+                  <div className="flex flex-wrap gap-x-6 gap-y-3 text-lg text-gray-900 font-semibold">
+                    <p>
+                      <span className="text-gray-700">Road No:</span>{" "}
+                      {nearestRoadProperties.ROADNO}
+                    </p>
+                    <p>
+                      <span className="text-gray-700">Lanes:</span>{" "}
+                      {nearestRoadProperties.LANES}
+                    </p>
+                    <p>
+                      <span className="text-gray-700">Surface Type:</span>{" "}
+                      {nearestRoadProperties.SURFTYPE}
+                    </p>
+                    <p>
+                      <span className="text-gray-700">Pavement Type:</span>{" "}
+                      {nearestRoadProperties.PAVETYPE}
+                    </p>
+                    <p>
+                      <span className="text-gray-700">Condition:</span>{" "}
+                      {nearestRoadProperties.CONDITION}
+                    </p>
+                  </div>
+
+                  {nearestRoadProperties.CONDITION === "Poor" && (
+                    <Button
+                      variant="destructive"
+                      className="mt-4"
+                      onClick={findNextBestRoad}
+                    >
+                      🚫 This road is in poor condition. Find alternative road
+                    </Button>
+                  )}
+                </div>
               )}
             </div>
           </div>
         </CardContent>
       </Card>
-
-      
 
       <Button
         variant="outline"
@@ -303,7 +427,7 @@ const SafeRoutePage = () => {
       </Button>
       {userLocation && nearestPointCoord && (
         <button
-          className="bg-green-600 text-white px-4 py-2 rounded mt-4"
+          className="bg-green-600 text-white px-4 py-2 rounded mt-4 ms-3 hover:bg-green-700 transition-colors"
           onClick={() => {
             const [startLng, startLat] = userLocation;
             const [endLng, endLat] = nearestPointCoord;
