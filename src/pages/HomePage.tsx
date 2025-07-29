@@ -102,7 +102,7 @@ const HomePage = () => {
       {/* Header */}
       <div className="text-center mb-8 mt-6">
         <h1 className="text-3xl font-bold text-primary mb-2 animate-slide-down">
-          Flood Watch Buddy
+          Flood Guardian
         </h1>
         <p className="text-muted-foreground text-lg">
           Stay safe, stay informed

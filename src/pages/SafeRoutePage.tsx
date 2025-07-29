@@ -50,6 +50,7 @@ const SafeRoutePage = () => {
     SURFTYPE?: string;
     PAVETYPE?: string;
     CONDITION?: string;
+    WIDTH?: number;
   } | null>(null);
 
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -86,6 +87,7 @@ const SafeRoutePage = () => {
       SURFTYPE: road.properties.SURFTYPE as string,
       PAVETYPE: road.properties.PAVETYPE as string,
       CONDITION: road.properties.CONDITION as string,
+      WIDTH: road.properties.WIDTH as number,
     });
 
     const route = turf.lineString([userLocation, snapped.geometry.coordinates]);
@@ -122,7 +124,8 @@ const SafeRoutePage = () => {
         <span>Lanes:</span> ${road.properties.LANES || "N/A"}<br/>
         <span>Surface:</span> ${road.properties.SURFTYPE || "N/A"}<br/>
         <span>Pavement:</span> ${road.properties.PAVETYPE || "N/A"}<br/>
-        <span>Condition:</span> ${road.properties.CONDITION || "N/A"}
+        <span>Condition:</span> ${road.properties.CONDITION || "N/A"}<br/>
+        <span>Road Width:</span> ${road.properties.WIDTH || "N/A"}
       </div>
     `
       )
@@ -153,6 +156,7 @@ const SafeRoutePage = () => {
           SURFTYPE: road.properties.SURFTYPE as string,
           PAVETYPE: road.properties.PAVETYPE as string,
           CONDITION: road.properties.CONDITION as string,
+          WIDTH: road.properties.WIDTH as number,
         });
       }
     });
@@ -200,7 +204,8 @@ const SafeRoutePage = () => {
           <span>Lanes:</span> ${nearestRoadProperties.LANES || "N/A"}<br/>
           <span>Surface:</span> ${nearestRoadProperties.SURFTYPE || "N/A"}<br/>
           <span>Pavement:</span> ${nearestRoadProperties.PAVETYPE || "N/A"}<br/>
-          <span>Condition:</span> ${nearestRoadProperties.CONDITION || "N/A"}
+          <span>Condition:</span> ${nearestRoadProperties.CONDITION || "N/A"}<br/>
+          <span>Road Width:</span> ${nearestRoadProperties.WIDTH || "N/A"}<br/>
         </div>
       `
           )
@@ -388,6 +393,10 @@ const SafeRoutePage = () => {
                     <p>
                       <span className="text-gray-700">Condition:</span>{" "}
                       {nearestRoadProperties.CONDITION}
+                    </p>
+                    <p>
+                      <span className="text-gray-700">Road Width:</span>{" "}
+                      {nearestRoadProperties.WIDTH ?? "N/A"}
                     </p>
                   </div>
 
