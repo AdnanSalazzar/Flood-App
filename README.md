@@ -16,6 +16,7 @@ Flood Watch Buddy is a React-based web application designed to help users stay s
 - **Report Flooding:** Submit flood reports with location, photo, and water depth.
 - **Settings:** Manage notifications, offline mode, emergency contacts, and language.
 - **Flood Safety Guide:** Access tips for before, during, and after a flood.
+- **Offline Bluetooth Chat:** Communicate with nearby users using Bluetooth/Mesh, even without internet.
 
 ---
 
@@ -69,6 +70,7 @@ flood-watch-buddy-app/
 - **Report Flood:** Use the "Report Flooding" page to submit a new report.
 - **Add Safe Shelter:** Use the "Add Safe Route" feature to add a new shelter.
 - **Change Language/Notifications:** Manage these in the Settings page.
+- **Offline Chat:** Use the "Offline Bluetooth Chat" page to send and receive messages locally.
 
 ---
 

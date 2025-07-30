@@ -101,9 +101,9 @@ const HomePage = () => {
       path: "/register-volunteer",
     },
     {
-      title: "Offline Message",
-      icon: Phone, 
-      path: "/verify-sms",
+      title: "Offline Chat",
+      icon: MessageCircle,
+      path: "/offline-chat",
     },
   ];
 
