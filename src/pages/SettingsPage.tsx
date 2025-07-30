@@ -47,8 +47,11 @@ const SettingsPage = () => {
   };
 
   const languages = [
-    { id: "english", label: "English", flag: "🇺🇸" },
-    { id: "bangla", label: "বাংলা (Bangla)", flag: "🇧🇩" },
+    { id: "english", label: "English", flag: "US" },
+    { id: "Hausa", label: "Hausa", flag: "NI" },
+    { id: "Yoroba", label: "Yoroba", flag: "NI" },
+    { id: "Edgo", label: "Edgo", flag: "NI" },
+    { id: "Tiv", label: "Tiv", flag: "NI" },
   ];
 
   const settingSections = [

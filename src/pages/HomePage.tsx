@@ -95,6 +95,16 @@ const HomePage = () => {
       icon: Image,
       path: "/gallery",
     },
+    {
+      title: "Register as Volunteer",
+      icon: LifeBuoy, // or choose another icon
+      path: "/register-volunteer",
+    },
+    {
+      title: "Offline Message",
+      icon: Phone, 
+      path: "/verify-sms",
+    },
   ];
 
   return (

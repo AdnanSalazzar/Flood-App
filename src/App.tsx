@@ -16,7 +16,8 @@ import AddShelterForm from './pages/AddShelterForm';
 import NotFound from "./pages/NotFound";
 import EmergencySosPage from "./pages/EmergencySosPage";
 import GalleryPage from "@/pages/GalleryPage";
-
+import RegisterVolunteerPage from "./pages/RegisterVolunteerPage";
+import VerificationSMSPage from "./pages/verificationSMSpage";
 
 
 
@@ -43,6 +44,8 @@ const App = () => (
             <Route path="/add-shelter-form" element={<AddShelterForm />} />
             <Route path="/emergency-sos" element={<EmergencySosPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/register-volunteer" element={<RegisterVolunteerPage />} />
+            <Route path="/verify-sms" element={<VerificationSMSPage />} /> 
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

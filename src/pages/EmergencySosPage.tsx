@@ -26,6 +26,8 @@ interface EmergencyContact {
 const EmergencySosPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showNgoModal, setShowNgoModal] = useState(false);
+
   const [gpsStatus, setGpsStatus] = useState<
     "acquiring" | "acquired" | "unavailable"
   >("acquiring");
@@ -48,8 +50,9 @@ const EmergencySosPage = () => {
     });
   };
   const handleEmergencyService = () => {
-    window.location.href = "tel:999";
+    window.location.href = "tel:112";
   };
+
   const handleDisasterOffice = () => {
     window.location.href = "tel:112";
   };
@@ -86,6 +89,23 @@ const EmergencySosPage = () => {
       );
     }
   }, []);
+
+  const [showNgoList, setShowNgoList] = useState(false);
+  const ngoList = [
+    { name: "YOUNG STARS ASSOCIATION", phone: "08064443668" },
+    {
+      name: "WORLD PEACE & CLIMATE CHANGE DIPLOMATICAFOLABI",
+      phone: "07046571997",
+    },
+    {
+      name: "HOPE ABILITY EMPOWERMENT INITIATIVE",
+      phone: "07060507551",
+    },
+    {
+      name: "HEALTH EMPOWERMENT AND DEVELOPMENT ACTION",
+      phone: "08184358855",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4">
@@ -156,7 +176,7 @@ const EmergencySosPage = () => {
               <PhoneCall className="h-6 w-6 text-red-600" />
             </div>
             <span className="font-medium text-sm">Emergency</span>
-            <span className="text-xs text-muted-foreground">Call 999</span>
+            <span className="text-xs text-muted-foreground">Call 112</span>
           </div>
         </Card>
         <Card
@@ -167,8 +187,8 @@ const EmergencySosPage = () => {
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
               <Building className="h-6 w-6 text-blue-600" />
             </div>
-            <span className="font-medium text-sm">Civil Defence</span>
-            <span className="text-xs text-muted-foreground">Call 112</span>
+            <span className="font-medium text-sm">Law Enforcement</span>
+            <span className="text-xs text-muted-foreground">Call 199</span>
           </div>
         </Card>
         <Card
@@ -200,7 +220,7 @@ const EmergencySosPage = () => {
 
         <Card
           className="p-4 cursor-pointer hover:shadow-lg transition-all duration-200 active:scale-95 bg-card/50 backdrop-blur-sm"
-          onClick={handleShareLocation}
+          onClick={() => setShowNgoModal(true)}
         >
           <div className="flex flex-col items-center space-y-2 text-center">
             <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
@@ -232,6 +252,49 @@ const EmergencySosPage = () => {
           </div>
         </Card>
       </div>
+
+      {showNgoModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-background rounded-2xl p-6 w-[90%] max-w-md shadow-lg relative">
+            {/* Close Button */}
+            <button
+              className="absolute top-2 right-3 text-muted-foreground hover:text-foreground"
+              onClick={() => setShowNgoModal(false)}
+            >
+              <XCircle className="h-5 w-5" />
+            </button>
+
+            {/* Modal Title */}
+            <h2 className="text-lg font-semibold mb-4 text-center">
+              NGO and Relief Organizations
+            </h2>
+
+            {/* NGO List */}
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {ngoList.map((ngo, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center border border-border rounded-xl p-3 bg-background/50 hover:shadow-md transition"
+                >
+                  <div className="flex flex-col">
+                    <span className="font-medium">{ngo.name}</span>
+                    <span className="text-muted-foreground text-sm">
+                      {ngo.phone}
+                    </span>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => (window.location.href = `tel:${ngo.phone}`)}
+                  >
+                    Call
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Emergency Contacts */}
       <Card className="p-4 bg-card/50 backdrop-blur-sm">

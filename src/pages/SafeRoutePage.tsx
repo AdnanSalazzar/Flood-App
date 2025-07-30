@@ -204,7 +204,9 @@ const SafeRoutePage = () => {
           <span>Lanes:</span> ${nearestRoadProperties.LANES || "N/A"}<br/>
           <span>Surface:</span> ${nearestRoadProperties.SURFTYPE || "N/A"}<br/>
           <span>Pavement:</span> ${nearestRoadProperties.PAVETYPE || "N/A"}<br/>
-          <span>Condition:</span> ${nearestRoadProperties.CONDITION || "N/A"}<br/>
+          <span>Condition:</span> ${
+            nearestRoadProperties.CONDITION || "N/A"
+          }<br/>
           <span>Road Width:</span> ${nearestRoadProperties.WIDTH || "N/A"}<br/>
         </div>
       `
@@ -514,6 +516,44 @@ const SafeRoutePage = () => {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      {/* Volunteer List */}
+      <div className="mb-6 max-h-64 overflow-y-auto">
+        <h2 className="text-xl font-bold mb-2">📋 Registered Volunteers</h2>
+        {(() => {
+          const volunteers = JSON.parse(
+            localStorage.getItem("volunteers") || "[]"
+          );
+
+          if (volunteers.length === 0) {
+            return (
+              <div className="text-muted-foreground italic">
+                No volunteers have registered yet.
+              </div>
+            );
+          }
+
+          return volunteers.map((volunteer, index) => (
+            <Card key={index} className="mb-2">
+              <CardContent className="p-3 flex items-center ">
+                <p className="font-semibold ">{volunteer.name}</p>
+                <p className="text-sm">📞 {volunteer.phone}</p>
+                <p className="text-sm">📍 {volunteer.location}</p>
+                
+                <button
+                  onClick={() =>
+                    alert(`Messaging ${volunteer.name} at ${volunteer.phone}`)
+                  }
+                  className="ml-auto bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium"
+                >
+                  Message
+                </button>
+                
+              </CardContent>
+            </Card>
+          ));
+        })()}
       </div>
 
       {/* Emergency Notice */}
